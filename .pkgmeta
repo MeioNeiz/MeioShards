@@ -1,0 +1,12 @@
+package-as: ShardKeeper
+
+move-folders:
+  ShardKeeper/addons/ShardKeeper: ShardKeeper
+
+ignore:
+  - docs
+  - README.md
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown

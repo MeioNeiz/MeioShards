@@ -1,0 +1,16 @@
+{
+  "title": "Meio Shard Keeper",
+  "summary": "Your Soul Shard count always on screen, and one click or key to delete the extras.",
+  "cfCategory": "Bags & Inventory",
+  "cfExtra": [],
+  "wagoCategories": [
+    "Bags & Inventory"
+  ],
+  "gallery": [
+    {
+      "file": "before-after.png",
+      "title": "Before and after",
+      "description": "Shards scattered in the bags, then the counter above them with its tooltip: shards per bag, what they make, how many a click deletes"
+    }
+  ]
+}
