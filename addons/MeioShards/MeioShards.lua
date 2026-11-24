@@ -456,7 +456,7 @@ MeioShards = {
   Cap = Cap,
   WantsMore = function() local cap = Cap() return not cap or count < cap end,
 }
-ShardKeeper = MeioShards -- old name, still called by other addons and macros
+_G.ShardKeeper = MeioShards -- old name, still called by other addons and macros
 BINDING_HEADER_SHARDKEEPER = "MeioShards"
 BINDING_NAME_SHARDKEEPER_TRIM = "Delete extra Soul Shards, else the cheapest junk item"
 
