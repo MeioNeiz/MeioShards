@@ -1,14 +1,14 @@
 ## Interface: 16001
-## Title: ShardKeeper
+## Title: MeioShards
 ## Notes: Your Soul Shard count always on screen, a key that deletes the shards your soul bag has no room for or above a cap, and a warning when you run low. /shards
 ## Version: 1.2.1
 ## Category: Meio
 ## IconTexture: Interface\Icons\INV_Misc_Gem_Amethyst_02
-## AddonCompartmentFunc: ShardKeeper_OnAddonCompartmentClick
+## AddonCompartmentFunc: MeioShards_OnAddonCompartmentClick
 ## Author: MeioNeiz
-## X-Website: https://github.com/MeioNeiz/ShardKeeper
+## X-Website: https://github.com/MeioNeiz/MeioShards
 ## X-License: MIT
-## SavedVariables: ShardKeeperDB
+## SavedVariables: MeioShardsDB
 
-ShardKeeper.lua
+MeioShards.lua
 Settings.lua

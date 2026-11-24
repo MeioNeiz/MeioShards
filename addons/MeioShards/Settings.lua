@@ -1,5 +1,5 @@
--- Options panel: Esc > Options > AddOns > ShardKeeper, or /shards settings. Writes straight
--- into ShardKeeperDB, the same keys the chat commands set. Warlocks only.
+-- Options panel: Esc > Options > AddOns > MeioShards, or /shards settings. Writes straight
+-- into MeioShardsDB, the same keys the chat commands set. Warlocks only.
 local _, ns = ...
 
 ns.CAP_MAX, ns.WARN_MAX = 40, 10
@@ -34,7 +34,7 @@ end
 
 function ns.RegisterSettings()
   if not (Settings and Settings.RegisterVerticalLayoutCategory) then return end
-  local category, layout = Settings.RegisterVerticalLayoutCategory("ShardKeeper")
+  local category, layout = Settings.RegisterVerticalLayoutCategory("MeioShards")
   ns.SetCategory(category)
   Checkbox(category, "show", "Shard counter", "Your Soul Shard count in a small box beside "
     .. "your bag buttons. Shift-drag it to move it; hover it for what your shards can make. "

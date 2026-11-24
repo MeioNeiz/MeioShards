@@ -5,16 +5,16 @@
 -- Trim runs only from a click on the counter, the key binding or /shards trim; never from an
 -- event or timer.
 -- Read-only API for other addons (MeioPlates' Drain Soul cue), no hooks needed:
---   ShardKeeper.Count() -> shards in bags; ShardKeeper.Cap() -> cap or nil when off;
---   ShardKeeper.WantsMore() -> true while below the cap (always, with no cap)
+--   MeioShards.Count() -> shards in bags; MeioShards.Cap() -> cap or nil when off;
+--   MeioShards.WantsMore() -> true while below the cap (always, with no cap)
 local ADDON, ns = ...
 local SLASH = "/shards"
 local SHARD = 6265
 -- bag family bit of a Soul Pouch / Felcloth Bag
 local SOUL_FAMILY = 0x4
-local PREFIX = "|cffb090ffShardKeeper:|r "
+local PREFIX = "|cffb090ffMeioShards:|r "
 local GOLD, MUTED, GOOD, BAD = "|cffffd100", "|cff999999", "|cff80ff80", "|cffff8080"
-local SETTINGS_PATH = "Esc > Options > AddOns > ShardKeeper"
+local SETTINGS_PATH = "Esc > Options > AddOns > MeioShards"
 local KEY_PATH = "Esc > Options > Keybindings > AddOns"
 local DEFAULTS = { show = true, cap = 20, warn = 1, chat = false, overflow = true }
 -- out of the way by default (never mid-screen): beside the bag buttons, shards being bag
@@ -130,7 +130,7 @@ local function Carries(use)
 end
 
 ------------------------------------------------------------------------------ counter frame
-local frame = CreateFrame("Button", "ShardKeeperFrame", UIParent, "BackdropTemplate")
+local frame = CreateFrame("Button", "MeioShardsFrame", UIParent, "BackdropTemplate")
 frame:SetSize(56, 26)
 frame:SetFrameStrata("MEDIUM")
 frame:SetClampedToScreen(true)
@@ -449,14 +449,15 @@ frame:SetScript("OnClick", function(self)
 end)
 
 ------------------------------------------------------------------------------ public
-ShardKeeper = {
+MeioShards = {
   Trim = Trim,
   Key = Key,
   Count = function() return count end,
   Cap = Cap,
   WantsMore = function() local cap = Cap() return not cap or count < cap end,
 }
-BINDING_HEADER_SHARDKEEPER = "ShardKeeper"
+ShardKeeper = MeioShards -- old name, still called by other addons and macros
+BINDING_HEADER_SHARDKEEPER = "MeioShards"
 BINDING_NAME_SHARDKEEPER_TRIM = "Delete extra Soul Shards, else the cheapest junk item"
 
 ns.DEFAULTS = DEFAULTS
@@ -495,7 +496,7 @@ local function OpenSettings()
 end
 function ns.SetCategory(c) category = c end
 
-function ShardKeeper_OnAddonCompartmentClick() OpenSettings() end
+function MeioShards_OnAddonCompartmentClick() OpenSettings() end
 
 -- "off" -> 0, a number in range -> it, else nil
 local function Number(arg, max)
@@ -504,8 +505,8 @@ local function Number(arg, max)
   if n and n >= 0 and n <= max then return math.floor(n) end
 end
 
-SLASH_SHARDKEEPER1 = SLASH
-SlashCmdList.SHARDKEEPER = function(msg)
+SLASH_MEIOSHARDS1 = SLASH
+SlashCmdList.MEIOSHARDS = function(msg)
   local word, arg = strtrim(msg or ""):lower():match("^(%S*)%s*(.-)$")
   if not isWarlock then
     Print("only for warlocks")
@@ -563,8 +564,8 @@ events:SetScript("OnEvent", function(self, event, arg1)
   if event == "ADDON_LOADED" then
     if arg1 ~= ADDON then return end
     self:UnregisterEvent("ADDON_LOADED")
-    ShardKeeperDB = ShardKeeperDB or {}
-    db = ShardKeeperDB
+    MeioShardsDB = MeioShardsDB or {}
+    db = MeioShardsDB
     for k, v in pairs(DEFAULTS) do
       if db[k] == nil then db[k] = v end
     end

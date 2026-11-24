@@ -1,5 +1,5 @@
 <Bindings>
   <Binding name="SHARDKEEPER_TRIM" header="SHARDKEEPER" category="ADDONS">
-    ShardKeeper.Key()
+    MeioShards.Key()
   </Binding>
 </Bindings>
