@@ -1,9 +1,9 @@
-# Meio Shard Keeper
+# Meio Shards
 
 Your Soul Shard count always on screen, and one click or key to clear out the extras.
 
-![Warlock bags: before, Soul Shards scattered among the loot to count by hand; with Shard
-Keeper, a counter above the bags showing 15, its tooltip listing shards per bag, what they
+![Warlock bags: before, Soul Shards scattered among the loot to count by hand; with Meio
+Shards, a counter above the bags showing 15, its tooltip listing shards per bag, what they
 can make and "Click: delete 7 (no room in your soul bag)"](docs/before-after.png)
 
 ## What it does
@@ -19,8 +19,8 @@ press its key) to delete the shards you don't want.
   RestedXP Guides' "Delete Cheapest Junk Item")
 - Sits beside the bag buttons; Shift-drag to move it
 
-Settings: Esc > Options > AddOns > ShardKeeper, or `/shards settings`. Delete key:
-Esc > Options > Keybindings > AddOns > ShardKeeper.
+Settings: Esc > Options > AddOns > MeioShards, or `/shards settings`. Delete key:
+Esc > Options > Keybindings > AddOns > MeioShards.
 
 - `/shards cap <n>|off`: keep at most n shards
 - `/shards overflow on|off`: also delete shards your full soul bag has no room for
@@ -38,7 +38,7 @@ Use your addon manager (CurseForge, Wago), or unzip a GitHub release into
 
 ## Feedback
 
-Bugs and ideas: [GitHub issues](https://github.com/MeioNeiz/ShardKeeper/issues)
+Bugs and ideas: [GitHub issues](https://github.com/MeioNeiz/MeioShards/issues)
 
 ## More Meio addons
 

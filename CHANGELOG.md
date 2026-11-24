@@ -1,4 +1,4 @@
-# Shard Keeper
+# Meio Shards
 
 ## 1.2.1
 
