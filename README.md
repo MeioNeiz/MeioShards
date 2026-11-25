@@ -12,40 +12,37 @@ and a chat line "deleted 7 Soul Shards, kept 8"](docs/before-after.png)
 ## What it does
 
 A small counter shows how many Soul Shards you carry. Hover it for the detail; click it (or
-press its key) to delete the shards you don't want. Only deletes when you click or press its
-key, never on its own.
+press its key) to delete the shards you don't want. Out of the box it only deletes when you
+click or press its key, never on its own.
 
 - Deletes the loose shards your full Soul Pouch has no room for, and any above your cap
   (20 by default), then moves loose shards that fit into the pouch
+- Never deletes in combat or a boss fight: it says "not in combat" instead of an error
 - Turns red when you run low, with an optional chat line
 - Tooltip: shards per bag and what you can make with them; Shift for each spell's cost
+- Shows on Titan Panel, ChocolateBar and other data broker bars: count, tooltip, click to
+  delete extras, right click for settings
 - With no shard to delete, the key deletes your cheapest junk item instead (Meio Bags, or
   RestedXP Guides' "Delete Cheapest Junk Item")
 - Sits beside the bag buttons; Shift-drag to move it
+
+New, off by default: extras that go by themselves on your next key press or click, never
+in combat and never the shards you brought from the bank; in dungeons, once you leave. It
+isn't tested in a live game yet, so it starts off. Try it with `/shards auto on` and tell us
+how it goes.
 
 Settings: Esc > Options > AddOns > MeioShards, or `/shards settings`. Delete key:
 Esc > Options > Keybindings > AddOns > MeioShards.
 
 - `/shards cap <n>|off`: keep at most n shards
+- `/shards trim`: delete the extra shards now; quiet, so it fits in your Drain Soul macro
+- `/shards auto on|off`: delete extras by themselves (off by default)
 - `/shards overflow on|off`: also delete shards your full soul bag has no room for
-- `/shards trim`: delete the extra shards now
 - `/shards warn <n>|off`: the counter turns red below n shards
 - `/shards chat on|off`: a chat line when it turns red
 - `/shards show on|off`: show or hide the counter
 - `/shards reset`: put the counter back in its place
 - `/shards help`
-
-## Coming soon
-
-- Extras go by themselves: shards over your cap leave on your next key press or click,
-  never in combat and never the ones you brought from the bank; in dungeons, once you
-  leave
-- `/shards trim` for your Drain Soul macro
-- Shows on Titan Panel, ChocolateBar and other data broker bars: count, tooltip, click to
-  delete extras
-
-![Coming soon: Soul Shards tooltip at 23 of 20: 1 goes by itself on your next key
-press](docs/soon.png)
 
 ## Install
 

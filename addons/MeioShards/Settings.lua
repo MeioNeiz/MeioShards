@@ -40,16 +40,22 @@ function ns.RegisterSettings()
     .. "your bag buttons. Shift-drag it to move it; hover it for what your shards can make. "
     .. "/shards show on||off does the same.")
 
-  Header(layout, "Deleting", "Shards are only ever deleted when you click the counter, press "
-    .. "the key (Esc > Options > Keybindings > AddOns) or type /shards trim.")
+  Header(layout, "Deleting", "Extras go when you click the counter, press the key "
+    .. "(Esc > Options > Keybindings > AddOns) or type /shards trim, or by themselves with "
+    .. "Auto delete extras on. Never in combat.")
+  Slider(category, "cap", "Keep at most", ns.CAP_MAX, "Above this many Soul Shards the counter "
+    .. "shows the cap in gold, and the extras are deleted: loose shards first, from your last "
+    .. "bag slot. Nothing else is touched. Off: never delete. MeioPlates' Drain Soul cue "
+    .. "follows this cap. /shards cap does the same.")
+  Checkbox(category, "auto", "Auto delete extras", "New, off by default. Shards over your "
+    .. "cap, or with no room in your soul bag, are deleted on your next key press or click in "
+    .. "the world. Never in combat; in a dungeon they go after you leave. Never the shards you "
+    .. "had at login or took from your bank, mail or a trade: click the counter for those. "
+    .. "/shards auto on||off does the same.")
   Checkbox(category, "overflow", "Delete loose shards", "With a soul bag "
     .. "equipped, the key deletes loose shards in your other bags once the soul bag is full, "
     .. "and moves them into it while it has room. Without a soul bag nothing is loose. "
     .. "/shards overflow on||off does the same.")
-  Slider(category, "cap", "Keep at most", ns.CAP_MAX, "Above this many Soul Shards the counter "
-    .. "shows the cap in gold, and a click on it deletes the extras: loose shards first, from "
-    .. "your last bag slot. Nothing else is touched. Off: never delete. MeioPlates' Drain Soul "
-    .. "cue follows this cap. /shards cap does the same.")
 
   Header(layout, "Running low", "Healthstone, Soulstone and every summon but the Imp cost "
     .. "one shard.")

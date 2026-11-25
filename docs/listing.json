@@ -11,6 +11,16 @@
       "file": "before-after.png",
       "title": "Before and after",
       "description": "Shards scattered in the bags, then the counter above them with its tooltip: shards per bag, what they make, how many a click deletes"
+    },
+    {
+      "file": "broker.png",
+      "title": "On Titan Panel and ChocolateBar",
+      "description": "The count on a data broker bar, its tooltip below it; click to delete extras"
+    },
+    {
+      "file": "auto.png",
+      "title": "Extras by themselves (off by default)",
+      "description": "With /shards auto on, the tooltip says how many go on your next key press"
     }
   ]
 }

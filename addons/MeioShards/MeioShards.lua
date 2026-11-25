@@ -2,8 +2,10 @@
 -- the loose shards a full soul bag has no room for. With no shard to delete, the key falls
 -- through to the cheapest junk item (MeioBags, else RestedXP's delete-cheapest-junk).
 -- Shards are plain bag items: no secret values. DeleteCursorItem needs a hardware event, so
--- Trim runs only from a click on the counter, the key binding or /shards trim; never from an
--- event or timer.
+-- Trim runs only from a click on the counter, the key binding or /shards trim, and the auto
+-- trim from any key press or click in the world (Warlock Tools Forever's method); never from
+-- an event or timer. The client refuses addon deletes in combat and under some restrictions
+-- (ADDON_ACTION_BLOCKED, a BugSack error), so both check first.
 -- Read-only API for other addons (MeioPlates' Drain Soul cue), no hooks needed:
 --   MeioShards.Count() -> shards in bags; MeioShards.Cap() -> cap or nil when off;
 --   MeioShards.WantsMore() -> true while below the cap (always, with no cap)
@@ -16,7 +18,7 @@ local PREFIX = "|cffb090ffMeioShards:|r "
 local GOLD, MUTED, GOOD, BAD = "|cffffd100", "|cff999999", "|cff80ff80", "|cffff8080"
 local SETTINGS_PATH = "Esc > Options > AddOns > MeioShards"
 local KEY_PATH = "Esc > Options > Keybindings > AddOns"
-local DEFAULTS = { show = true, cap = 20, warn = 1, chat = false, overflow = true }
+local DEFAULTS = { show = true, cap = 20, warn = 1, chat = false, overflow = true, auto = false }
 -- out of the way by default (never mid-screen): beside the bag buttons, shards being bag
 -- items; top-left corner when there is no bags bar
 local FALLBACK_POINT = { "TOPLEFT", "TOPLEFT", 6, -80 }
@@ -26,6 +28,18 @@ local BRONZE = { 0.65, 0.49, 0.27 }
 local GREY = { 0.5, 0.5, 0.5 }
 local RED = { 0.9, 0.25, 0.22 }
 local DRAG_CLICK_GUARD = 0.3
+-- shards that arrive while one of these is open (or just after: BAG_UPDATE_DELAYED lags the
+-- close) were brought, not farmed, and auto trim keeps them
+local SOURCES = {
+  BANKFRAME_OPENED = "BANKFRAME_CLOSED", MAIL_SHOW = "MAIL_CLOSED",
+  TRADE_SHOW = "TRADE_CLOSED", GUILDBANKFRAME_OPENED = "GUILDBANKFRAME_CLOSED",
+}
+local SOURCE_GRACE = 2
+-- the key or click that just auto trimmed shouldn't then say "nothing to delete"
+local AUTO_ECHO = 0.5
+local HARD_RESTRICTIONS = { "Combat", "Encounter", "ChallengeMode", "PvPMatch" }
+local MAP_LINE = "the game doesn't let addons delete items in this dungeon: delete by hand, "
+  .. "or the extras go after you leave"
 
 -- What a shard buys, highest rank first. short: in the default tooltip line; items: the made
 -- item, to say you already carry one. perCast: costs a shard every cast.
@@ -49,6 +63,13 @@ local USES = {
 local db, isWarlock, category
 local settings = {}
 local count, perBag, overflow = 0, {}, 0
+-- shards auto trim never deletes: those at login and those brought from a bank, mail or trade;
+-- lowered as shards are used
+local keep
+local sourcing, sourceUntil = {}, 0
+local mapRefused, lastAuto = false, 0
+-- after an auto delete, until the bags rescan: a second key press would see the old count
+local autoWait = false
 local wasLow, scanned
 -- login is silent: spells and bags arrive in pieces just after it
 local QUIET_AFTER_LOGIN = 10
@@ -63,6 +84,33 @@ local function OnOff(on) return on and GOOD .. "on|r" or BAD .. "off|r" end
 local function Cap() return db and db.cap and db.cap > 0 and db.cap or nil end
 local function AboveCap() local cap = Cap() return cap and math.max(0, count - cap) or 0 end
 local function Extra() return math.max(AboveCap(), overflow) end
+
+local function Restricted(name)
+  local kinds = Enum and Enum.AddOnRestrictionType
+  local api = C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive
+  if not (api and kinds and kinds[name]) then return false end
+  return api(kinds[name]) == true
+end
+
+local function InCombat()
+  if InCombatLockdown() then return true end
+  local fighting = UnitAffectingCombat("player")
+  if (issecretvalue and issecretvalue(fighting)) or fighting then return true end
+  for _, name in ipairs(HARD_RESTRICTIONS) do
+    if Restricted(name) then return true end
+  end
+  return false
+end
+
+-- set for a whole dungeon visit; may still allow deletes, so only a click tries
+local function MapRestricted() return Restricted("Map") end
+
+local function Sourcing() return next(sourcing) ~= nil or GetTime() < sourceUntil end
+
+local function AutoExtra()
+  if not (db and db.auto and keep) then return 0 end
+  return math.min(Extra(), math.max(0, count - keep))
+end
 
 local function LastBag() return NUM_TOTAL_EQUIPPED_BAG_SLOTS or NUM_BAG_SLOTS or 4 end
 
@@ -189,11 +237,18 @@ local function Place()
 end
 
 local function ShowTooltip() end
-local function TooltipOpen() return GameTooltip:IsShown() and GameTooltip:IsOwned(frame) end
+-- the counter, or a data broker display's button (Titan Panel, ChocolateBar)
+local tipOwner = frame
+local broker
+local function TooltipOpen() return GameTooltip:IsShown() and GameTooltip:IsOwned(tipOwner) end
 
 local function Update()
   if not (db and isWarlock) then return end
   count, perBag, overflow = Scan()
+  autoWait = false
+  local quiet = GetTime() - loginAt < QUIET_AFTER_LOGIN
+  -- bags fill in over the first seconds: all of that is "at login"
+  if not keep or count < keep or (count > keep and (quiet or Sourcing())) then keep = count end
   local low = count < Needed()
   local cap = Cap()
   if low then
@@ -209,13 +264,13 @@ local function Update()
   frame:SetBackdropBorderColor(c[1], c[2], c[3], 1)
   frame:SetWidth(math.ceil(text:GetStringWidth()) + 18 + 5 + 5 + 8)
   frame:SetShown(db.show and (count > 0 or KnowsAny()))
-  local quiet = GetTime() - loginAt < QUIET_AFTER_LOGIN
+  if broker then broker.text = text:GetText() end
   if scanned and low and not wasLow and db.chat and not quiet then
     Print(BAD .. (count == 0 and "no Soul Shards left" or ("only %d Soul Shard%s left")
       :format(count, count == 1 and "" or "s")) .. "|r - Drain Soul a mob as it dies for more")
   end
   wasLow, scanned = low, true
-  if TooltipOpen() then ShowTooltip() end
+  if TooltipOpen() then ShowTooltip(tipOwner) end
 end
 
 local function TrimOrder()
@@ -274,17 +329,8 @@ local function Tidy()
   return moved
 end
 
--- deletes the loose shards a full soul bag has no room for and any above the cap, then
--- moves the loose ones that fit into the soul bag. False when there was nothing to do
--- (quiet: say nothing then)
-local function Trim(quiet)
-  if not (db and isWarlock) then return false end
-  if CursorHasItem() then
-    Print(BAD .. "put down the item on your cursor first|r")
-    return true
-  end
-  count, perBag, overflow = Scan()
-  local excess = Extra()
+-- -> shards deleted, true when the client refused a delete
+local function Delete(excess)
   local deleted = 0
   for _, s in ipairs(TrimOrder()) do
     if deleted >= excess then break end
@@ -298,14 +344,46 @@ local function Trim(quiet)
         break
       end
       DeleteCursorItem()
-      -- refused (no hardware event): put it back rather than drop it in the next slot
+      -- refused: put it back rather than drop it in the next slot
       if CursorHasItem() then
         ClearCursor()
-        break
+        return deleted, true
       end
       deleted = deleted + n
     end
   end
+  return deleted, false
+end
+
+-- deletes the loose shards a full soul bag has no room for and any above the cap, then
+-- moves the loose ones that fit into the soul bag. False when there was nothing to do
+-- (quiet, as from a macro: say nothing then, nor in combat)
+local function Trim(quiet)
+  if not (db and isWarlock) then return false end
+  if InCombat() then
+    if quiet then return false end
+    Print(BAD .. "not in combat|r" .. (db.auto and AutoExtra() > 0
+      and ": the extras go by themselves after the fight" or ": click again after the fight"))
+    return true
+  end
+  if CursorHasItem() then
+    Print(BAD .. "put down the item on your cursor first|r")
+    return true
+  end
+  count, perBag, overflow = Scan()
+  local excess = Extra()
+  local map = MapRestricted()
+  if excess > 0 and map and mapRefused then
+    Print(MAP_LINE)
+    return true
+  end
+  local deleted, refused = Delete(excess)
+  if refused and deleted == 0 and map then
+    mapRefused = true
+    Print(MAP_LINE)
+    return true
+  end
+  if keep then keep = math.min(keep, count - deleted) end
   local moved = db.overflow and Tidy() or 0
   if excess > 0 and deleted == 0 then
     Print(BAD .. "could not delete any Soul Shards|r (try again in a moment)")
@@ -315,7 +393,7 @@ local function Trim(quiet)
   elseif moved > 0 then
     Print(("moved %d Soul Shard%s into your soul bag"):format(moved, Plural(moved)))
   else
-    if quiet then return false end
+    if quiet or GetTime() - lastAuto < AUTO_ECHO then return false end
     local cap = Cap()
     Print(("%d Soul Shards, nothing to delete"):format(count)
       .. (cap and (" (cap %d)"):format(cap) or ""))
@@ -338,6 +416,35 @@ local function Key()
   local junk = JunkDelete()
   if Trim(junk ~= nil) or not junk then return end
   junk()
+end
+
+-- silent: the counter going down is the feedback; one chat line per Drain Soul kill at the
+-- cap would be noise. Never in a dungeon (a refusal is a BugSack error); they go on leaving.
+local function AutoTrim()
+  if not isWarlock or autoWait or AutoExtra() == 0 then return end
+  if InCombat() or MapRestricted() or CursorHasItem() then return end
+  if Delete(AutoExtra()) > 0 then
+    lastAuto, autoWait = GetTime(), true
+  end
+end
+
+WorldFrame:HookScript("OnMouseDown", AutoTrim)
+
+-- sees every key press without taking it from the game; propagation is protected in combat
+local keys = CreateFrame("Frame", nil, UIParent)
+keys:EnableKeyboard(true)
+keys:SetScript("OnKeyDown", AutoTrim)
+local function Propagate() keys:SetPropagateKeyboardInput(true) end
+if InCombatLockdown() then
+  keys:EnableKeyboard(false)
+  keys:SetScript("OnEvent", function(self)
+    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    Propagate()
+    self:EnableKeyboard(true)
+  end)
+  keys:RegisterEvent("PLAYER_REGEN_ENABLED")
+else
+  Propagate()
 end
 
 ------------------------------------------------------------------------------ tooltip
@@ -379,15 +486,30 @@ local function Detail()
   local cap = Cap()
   Pair("Keep at most", cap and tostring(cap) or "off")
   Pair("No room in soul bag", db.overflow and "delete" or "keep")
+  Pair("Auto delete extras", db.auto and "on" or "off")
   Pair("Warn below", db.warn > 0 and tostring(db.warn) or "off")
   local key = GetBindingKey("SHARDKEEPER_TRIM")
   Pair("Delete key", key and GetBindingText(key) or "not bound", key and 1 or 0.6,
     key and 1 or 0.6, key and 1 or 0.6)
-  GameTooltip:AddLine(MUTED .. "Shift-drag to move. " .. SLASH .. " for options.|r")
+  if tipOwner == frame then
+    GameTooltip:AddLine(MUTED .. "Shift-drag to move. " .. SLASH .. " for options.|r")
+  else
+    GameTooltip:AddLine(MUTED .. "Right-click for options.|r")
+  end
 end
 
-ShowTooltip = function()
-  GameTooltip:SetOwner(frame, "ANCHOR_TOP")
+ShowTooltip = function(owner)
+  tipOwner = owner or frame
+  if tipOwner == frame then
+    GameTooltip:SetOwner(frame, "ANCHOR_TOP")
+  else
+    -- broker bars sit at the top or bottom edge: open away from it
+    local _, y = tipOwner:GetCenter()
+    local top = y and y * tipOwner:GetEffectiveScale() > UIParent:GetHeight()
+      * UIParent:GetEffectiveScale() / 2
+    GameTooltip:SetOwner(tipOwner, "ANCHOR_NONE")
+    GameTooltip:SetPoint(top and "TOP" or "BOTTOM", tipOwner, top and "BOTTOM" or "TOP")
+  end
   local low = count < Needed()
   local r, g, b = 1, 1, 1
   if low then r, g, b = 1, 0.5, 0.5 end
@@ -411,6 +533,12 @@ ShowTooltip = function()
     local key = GetBindingKey("SHARDKEEPER_TRIM")
     GameTooltip:AddLine(("Click%s: delete %d (%s)"):format(key and " or " .. GetBindingText(key)
       or "", extra, why), 1, 0.82, 0, true)
+    local auto = AutoExtra()
+    if auto > 0 then
+      GameTooltip:AddLine(("%d go%s by %s on your next key press%s"):format(auto,
+        auto == 1 and "es" or "", auto == 1 and "itself" or "themselves",
+        InCombat() and " after the fight" or ""), 0.6, 0.6, 0.6, true)
+    end
   end
   if IsShiftKeyDown() then Detail() else ShiftHint() end
   GameTooltip:Show()
@@ -427,7 +555,7 @@ frame:SetScript("OnLeave", function(self)
   GameTooltip_Hide()
 end)
 frame:SetScript("OnEvent", function()
-  if TooltipOpen() then ShowTooltip() end
+  if TooltipOpen() then ShowTooltip(tipOwner) end
 end)
 frame:SetScript("OnDragStart", function(self)
   if not IsShiftKeyDown() then return end
@@ -477,17 +605,19 @@ local function Help()
   Print("your Soul Shard count on screen, a key to delete extras and a warning when low")
   local cap = Cap()
   Line(Cmd(SLASH .. " cap <n>||off") .. " - keep at most n; click the counter or press the key"
-    .. " to delete the rest (now " .. (cap or "off") .. ")")
-  Line(Cmd(SLASH .. " overflow on||off") .. " - the key also deletes loose shards your full soul"
-    .. " bag has no room for (now " .. OnOff(db.overflow) .. ")")
-  Line(Cmd(SLASH .. " trim") .. " - delete the extra shards now")
+    .. " for the rest (now " .. (cap or "off") .. ")")
+  Line(Cmd(SLASH .. " auto on||off") .. " - new: delete extras on your next key press, never"
+    .. " in combat or the shards you brought (now " .. OnOff(db.auto) .. ")")
+  Line(Cmd(SLASH .. " trim") .. " - delete the extras now; quiet, for your Drain Soul macro."
+    .. " Key: " .. KEY_PATH)
+  Line(Cmd(SLASH .. " overflow on||off") .. " - also delete loose shards your full soul bag"
+    .. " has no room for (now " .. OnOff(db.overflow) .. ")")
   Line(Cmd(SLASH .. " warn <n>||off") .. " - counter turns red below n shards (now "
     .. (db.warn > 0 and db.warn or "off") .. ")")
   Line(Cmd(SLASH .. " chat on||off") .. " - a chat line when it turns red (now "
     .. OnOff(db.chat) .. ")")
   Line(Cmd(SLASH .. " show on||off") .. " - the counter (now " .. OnOff(db.show) .. ")")
-  Line(Cmd(SLASH .. " reset") .. " - put the counter back")
-  Line(MUTED .. "Shift-drag the counter to move it. Delete key: " .. KEY_PATH .. "|r")
+  Line(Cmd(SLASH .. " reset") .. " - put the counter back (Shift-drag it to move it)")
   Line("Settings: " .. SETTINGS_PATH .. " (" .. Cmd(SLASH .. " settings") .. ")")
 end
 
@@ -517,7 +647,7 @@ SlashCmdList.MEIOSHARDS = function(msg)
   elseif word == "settings" or word == "options" then
     OpenSettings()
   elseif word == "trim" then
-    Trim()
+    Trim(true)
   elseif word == "cap" then
     local n = Number(arg, ns.CAP_MAX)
     if not n then
@@ -540,11 +670,12 @@ SlashCmdList.MEIOSHARDS = function(msg)
     Set("warn", n)
     Print(n == 0 and "low warning " .. OnOff(false)
       or ("counter turns red below %d Soul Shard%s"):format(n, n == 1 and "" or "s"))
-  elseif (word == "chat" or word == "show" or word == "overflow")
+  elseif (word == "chat" or word == "show" or word == "overflow" or word == "auto")
       and (arg == "on" or arg == "off") then
     Set(word, arg == "on")
     local what = { chat = "chat line when low ", show = "counter ",
-      overflow = "deleting shards your soul bag has no room for " }
+      overflow = "deleting shards your soul bag has no room for ",
+      auto = "auto delete extras " }
     Print(what[word] .. OnOff(arg == "on"))
   elseif word == "reset" then
     db.point = nil
@@ -556,7 +687,34 @@ SlashCmdList.MEIOSHARDS = function(msg)
   end
 end
 
+------------------------------------------------------------------------------ data broker
+-- A feed for Titan Panel, ChocolateBar and other broker bars. No library of our own: every
+-- broker display embeds LibDataBroker, so with no display there is nothing to feed.
+local function RegisterBroker()
+  local ldb = LibStub and LibStub("LibDataBroker-1.1", true)
+  if not ldb or ldb:GetDataObjectByName(ADDON) then return end
+  broker = ldb:NewDataObject(ADDON, {
+    type = "data source",
+    label = "Soul Shards",
+    text = "0",
+    icon = icon:GetTexture(),
+    OnClick = function(_, button)
+      if button == "RightButton" then OpenSettings() elseif Extra() > 0 then Trim() end
+    end,
+    OnEnter = function(display)
+      ShowTooltip(display)
+      frame:RegisterEvent("MODIFIER_STATE_CHANGED")
+    end,
+    OnLeave = function()
+      frame:UnregisterEvent("MODIFIER_STATE_CHANGED")
+      GameTooltip_Hide()
+    end,
+  })
+end
+
 ------------------------------------------------------------------------------ events
+local CLOSES = {}
+for open, close in pairs(SOURCES) do CLOSES[close] = open end
 local events = CreateFrame("Frame")
 events:RegisterEvent("ADDON_LOADED")
 events:RegisterEvent("PLAYER_LOGIN")
@@ -578,15 +736,27 @@ events:SetScript("OnEvent", function(self, event, arg1)
     LearnSpells()
     local ok, err = pcall(ns.RegisterSettings)
     if not ok then geterrorhandler()(err) end
+    ok, err = pcall(RegisterBroker)
+    if not ok then geterrorhandler()(err) end
     self:RegisterEvent("BAG_UPDATE_DELAYED")
     self:RegisterEvent("SPELLS_CHANGED")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    for open, close in pairs(SOURCES) do
+      pcall(self.RegisterEvent, self, open)
+      pcall(self.RegisterEvent, self, close)
+    end
     -- Edit Mode applies the bags bar's spot after login
     pcall(self.RegisterEvent, self, "EDIT_MODE_LAYOUTS_UPDATED")
     Update()
   elseif event == "EDIT_MODE_LAYOUTS_UPDATED" then
     Place()
+  elseif SOURCES[event] then
+    sourcing[event] = true
+  elseif CLOSES[event] then
+    sourcing[CLOSES[event]] = nil
+    sourceUntil = GetTime() + SOURCE_GRACE
   else
+    if event == "PLAYER_ENTERING_WORLD" then mapRefused = false end
     if event == "SPELLS_CHANGED" then LearnSpells() end
     Update()
   end
