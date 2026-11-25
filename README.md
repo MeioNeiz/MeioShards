@@ -41,6 +41,8 @@ Esc > Options > Keybindings > AddOns > MeioShards.
   never in combat and never the ones you brought from the bank; in dungeons, once you
   leave
 - `/shards trim` for your Drain Soul macro
+- Shows on Titan Panel, ChocolateBar and other data broker bars: count, tooltip, click to
+  delete extras
 
 ![Coming soon: Soul Shards tooltip at 23 of 20: 1 goes by itself on your next key
 press](docs/soon.png)
