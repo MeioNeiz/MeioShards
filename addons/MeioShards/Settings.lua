@@ -36,21 +36,17 @@ function ns.RegisterSettings()
   if not (Settings and Settings.RegisterVerticalLayoutCategory) then return end
   local category, layout = Settings.RegisterVerticalLayoutCategory("MeioShards")
   ns.SetCategory(category)
-  Checkbox(category, "show", "Shard counter", "Your Soul Shard count in a small box beside "
-    .. "your bag buttons. Shift-drag it to move it; hover it for what your shards can make. "
-    .. "/shards show on||off does the same.")
-
-  Header(layout, "Deleting", "Extras go when you click the counter, press the key "
-    .. "(Esc > Options > Keybindings > AddOns) or type /shards trim, or by themselves with "
-    .. "Auto delete extras on. Never in combat.")
-  Slider(category, "cap", "Keep at most", ns.CAP_MAX, "Above this many Soul Shards the counter "
+  Header(layout, "Deleting", "Extras go when you press the key (Esc > Options > Keybindings "
+    .. "> AddOns), type /shards trim or click the count, or by themselves with Auto delete "
+    .. "extras on. Never in combat.")
+  Slider(category, "cap", "Keep at most", ns.CAP_MAX, "Above this many Soul Shards the count "
     .. "shows the cap in gold, and the extras are deleted: loose shards first, from your last "
     .. "bag slot. Nothing else is touched. Off: never delete. MeioPlates' Drain Soul cue "
     .. "follows this cap. /shards cap does the same.")
   Checkbox(category, "auto", "Auto delete extras", "New, off by default. Shards over your "
     .. "cap, or with no room in your soul bag, are deleted on your next key press or click in "
     .. "the world. Never in combat; in a dungeon they go after you leave. Never the shards you "
-    .. "had at login or took from your bank, mail or a trade: click the counter for those. "
+    .. "had at login or took from your bank, mail or a trade: press the key for those. "
     .. "/shards auto on||off does the same.")
   Checkbox(category, "overflow", "Delete loose shards", "With a soul bag "
     .. "equipped, the key deletes loose shards in your other bags once the soul bag is full, "
@@ -59,14 +55,18 @@ function ns.RegisterSettings()
 
   Header(layout, "Running low", "Healthstone, Soulstone and every summon but the Imp cost "
     .. "one shard.")
-  Slider(category, "warn", "Warn below", ns.WARN_MAX, "The counter turns red with fewer Soul "
-    .. "Shards than this, once you know a spell that uses one. Off: never red. /shards warn "
+  Slider(category, "warn", "Warn below", ns.WARN_MAX, "Fewer Soul Shards than this is low, "
+    .. "once you know a spell that uses one: the count turns red. Off: never low. /shards warn "
     .. "does the same.")
-  Checkbox(category, "chat", "Chat line when low", "One line in chat when the counter turns "
-    .. "red. Never at login. /shards chat on||off does the same.")
+  Checkbox(category, "chat", "Chat line when low", "One line in chat when you run low. Never "
+    .. "at login. /shards chat on||off does the same.")
 
+  Header(layout, "Counter", "Your count also shows on Titan Panel, ChocolateBar and other data "
+    .. "broker bars. /shards help lists every chat command.")
+  Checkbox(category, "show", "Count on screen", "Off by default. Your Soul Shard count in "
+    .. "a small box beside your bag buttons: hover it for what your shards can make, click it "
+    .. "to delete the extras, Shift-drag to move it. /shards show on||off does the same.")
   if CreateSettingsButtonInitializer then
-    Header(layout, "Counter", "/shards help lists every chat command.")
     layout:AddInitializer(CreateSettingsButtonInitializer("Counter position", "Reset position",
       function()
         ns.DB().point = nil

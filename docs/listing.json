@@ -1,6 +1,6 @@
 {
   "title": "Meio Shards",
-  "summary": "Soul Shard count on screen; one click deletes the extras over your cap.",
+  "summary": "One key deletes the Soul Shards over your cap or soul bag, never in combat.",
   "cfCategory": "Bags & Inventory",
   "cfExtra": [],
   "wagoCategories": [
@@ -10,17 +10,12 @@
     {
       "file": "before-after.png",
       "title": "Before and after",
-      "description": "Shards scattered in the bags, then the counter above them with its tooltip: shards per bag, what they make, how many a click deletes"
+      "description": "Shards scattered in the bags, then one key press later the extras gone and a chat line saying how many"
     },
     {
       "file": "broker.png",
       "title": "On Titan Panel and ChocolateBar",
       "description": "The count on a data broker bar, its tooltip below it; click to delete extras"
-    },
-    {
-      "file": "auto.png",
-      "title": "Extras by themselves (off by default)",
-      "description": "With /shards auto on, the tooltip says how many go on your next key press"
     }
   ]
 }

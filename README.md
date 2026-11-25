@@ -1,30 +1,31 @@
 # Meio Shards
 
-Your Soul Shard count always on screen, and one click or key to clear out the extras.
+One key deletes the Soul Shards you don't need, and a chat line tells you when you run out.
 
 For WoW Forever.
 
-![Warlock bags: before, Soul Shards scattered among the loot to count by hand; with Meio
-Shards, a counter above the bags showing 15, its tooltip listing shards per bag, what they
-can make and "Click: delete 7 (no room in your soul bag)"; one click later, the counter at 8
-and a chat line "deleted 7 Soul Shards, kept 8"](docs/before-after.png)
+![Warlock bags: before, Soul Shards scattered among the loot and a full Soul Pouch; one
+press of the Meio Shards key later, the 7 loose shards the pouch has no room for are gone
+and a chat line says "deleted 7 Soul Shards, kept 8"](docs/before-after.png)
 
 ## What it does
 
-A small counter shows how many Soul Shards you carry. Hover it for the detail; click it (or
-press its key) to delete the shards you don't want. Out of the box it only deletes when you
-click or press its key, never on its own.
+Press its key to delete the shards you don't want. Out of the box it only deletes when you
+press the key, never on its own.
 
 - Deletes the loose shards your full Soul Pouch has no room for, and any above your cap
   (20 by default), then moves loose shards that fit into the pouch
 - Never deletes in combat or a boss fight: it says "not in combat" instead of an error
-- Turns red when you run low, with an optional chat line
-- Tooltip: shards per bag and what you can make with them; Shift for each spell's cost
-- Shows on Titan Panel, ChocolateBar and other data broker bars: count, tooltip, click to
-  delete extras, right click for settings
+- A chat line when you run out of shards
+- Shows on Titan Panel, ChocolateBar and other data broker bars: count, shards per bag and
+  what you can make with them, click to delete extras, right click for settings
+
+![The count on a data broker bar, 22 of a cap of 20, its tooltip below: shards per bag,
+what they can make and "Click: delete 2 (no room in your soul bag)"](docs/broker.png)
+
 - With no shard to delete, the key deletes your cheapest junk item instead (Meio Bags, or
   RestedXP Guides' "Delete Cheapest Junk Item")
-- Sits beside the bag buttons; Shift-drag to move it
+- Want the count on screen? `/shards show on` puts a small counter beside your bag buttons
 
 New, off by default: extras that go by themselves on your next key press or click, never
 in combat and never the shards you brought from the bank; in dungeons, once you leave. It
@@ -34,14 +35,14 @@ how it goes.
 Settings: Esc > Options > AddOns > MeioShards, or `/shards settings`. Delete key:
 Esc > Options > Keybindings > AddOns > MeioShards.
 
-- `/shards cap <n>|off`: keep at most n shards
 - `/shards trim`: delete the extra shards now; quiet, so it fits in your Drain Soul macro
+- `/shards cap <n>|off`: keep at most n shards
 - `/shards auto on|off`: delete extras by themselves (off by default)
 - `/shards overflow on|off`: also delete shards your full soul bag has no room for
-- `/shards warn <n>|off`: the counter turns red below n shards
-- `/shards chat on|off`: a chat line when it turns red
-- `/shards show on|off`: show or hide the counter
-- `/shards reset`: put the counter back in its place
+- `/shards warn <n>|off`: low below n shards
+- `/shards chat on|off`: a chat line when you run low
+- `/shards show on|off`: your shard count on screen (off by default)
+- `/shards reset`: put the counter back beside your bag buttons
 - `/shards help`
 
 ## Install

@@ -1,5 +1,12 @@
 # Meio Shards
 
+## 1.4.0
+
+- The Soul Shard counter is no longer on screen: the key, `/shards trim` and data broker
+  bars do the work. Want it back? `/shards show on`, or Esc > Options > AddOns > MeioShards
+- With the counter gone, the chat line when you run out of shards is now on (`/shards chat
+  off` to stop it)
+
 ## 1.3.0
 
 - Clicking the counter or pressing the key in combat or a boss fight no longer causes an

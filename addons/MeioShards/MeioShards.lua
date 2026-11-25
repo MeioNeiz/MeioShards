@@ -1,8 +1,9 @@
--- Soul Shard counter for warlocks: count on screen, a cap, a warning when low, and deleting
--- the loose shards a full soul bag has no room for. With no shard to delete, the key falls
+-- Soul Shards for warlocks: a cap, deleting the extras and the loose shards a full soul bag
+-- has no room for, a warning when low, the count on data broker bars and an on-screen
+-- counter (off by default). With no shard to delete, the key falls
 -- through to the cheapest junk item (MeioBags, else RestedXP's delete-cheapest-junk).
 -- Shards are plain bag items: no secret values. DeleteCursorItem needs a hardware event, so
--- Trim runs only from a click on the counter, the key binding or /shards trim, and the auto
+-- Trim runs only from a click on the counter or broker feed, the key binding or /shards trim, and the auto
 -- trim from any key press or click in the world (Warlock Tools Forever's method); never from
 -- an event or timer. The client refuses addon deletes in combat and under some restrictions
 -- (ADDON_ACTION_BLOCKED, a BugSack error), so both check first.
@@ -18,7 +19,10 @@ local PREFIX = "|cffb090ffMeioShards:|r "
 local GOLD, MUTED, GOOD, BAD = "|cffffd100", "|cff999999", "|cff80ff80", "|cffff8080"
 local SETTINGS_PATH = "Esc > Options > AddOns > MeioShards"
 local KEY_PATH = "Esc > Options > Keybindings > AddOns"
-local DEFAULTS = { show = true, cap = 20, warn = 1, chat = false, overflow = true, auto = false }
+local DEFAULTS = { show = false, cap = 20, warn = 1, chat = true, overflow = true, auto = false }
+-- 2: counter off by default (1.4.0); hidden once for those who had it, the chat line taking
+-- over its red low warning
+local DB_VERSION = 2
 -- out of the way by default (never mid-screen): beside the bag buttons, shards being bag
 -- items; top-left corner when there is no bags bar
 local FALLBACK_POINT = { "TOPLEFT", "TOPLEFT", 6, -80 }
@@ -267,7 +271,7 @@ local function Update()
   if broker then broker.text = text:GetText() end
   if scanned and low and not wasLow and db.chat and not quiet then
     Print(BAD .. (count == 0 and "no Soul Shards left" or ("only %d Soul Shard%s left")
-      :format(count, count == 1 and "" or "s")) .. "|r - Drain Soul a mob as it dies for more")
+      :format(count, count == 1 and "" or "s")) .. "|r: Drain Soul a mob as it dies for more")
   end
   wasLow, scanned = low, true
   if TooltipOpen() then ShowTooltip(tipOwner) end
@@ -602,21 +606,22 @@ end
 
 ------------------------------------------------------------------------------ slash
 local function Help()
-  Print("your Soul Shard count on screen, a key to delete extras and a warning when low")
+  Print("deletes the Soul Shards over your cap with a key, and warns when you run low")
   local cap = Cap()
-  Line(Cmd(SLASH .. " cap <n>||off") .. " - keep at most n; click the counter or press the key"
-    .. " for the rest (now " .. (cap or "off") .. ")")
+  Line(Cmd(SLASH .. " cap <n>||off") .. " - keep at most n; press the key for the rest (now "
+    .. (cap or "off") .. ")")
   Line(Cmd(SLASH .. " auto on||off") .. " - new: delete extras on your next key press, never"
     .. " in combat or the shards you brought (now " .. OnOff(db.auto) .. ")")
   Line(Cmd(SLASH .. " trim") .. " - delete the extras now; quiet, for your Drain Soul macro."
     .. " Key: " .. KEY_PATH)
   Line(Cmd(SLASH .. " overflow on||off") .. " - also delete loose shards your full soul bag"
     .. " has no room for (now " .. OnOff(db.overflow) .. ")")
-  Line(Cmd(SLASH .. " warn <n>||off") .. " - counter turns red below n shards (now "
+  Line(Cmd(SLASH .. " warn <n>||off") .. " - low below n shards (now "
     .. (db.warn > 0 and db.warn or "off") .. ")")
-  Line(Cmd(SLASH .. " chat on||off") .. " - a chat line when it turns red (now "
+  Line(Cmd(SLASH .. " chat on||off") .. " - a chat line when you run low (now "
     .. OnOff(db.chat) .. ")")
-  Line(Cmd(SLASH .. " show on||off") .. " - the counter (now " .. OnOff(db.show) .. ")")
+  Line(Cmd(SLASH .. " show on||off") .. " - your shard count on screen (now " .. OnOff(db.show)
+    .. ")")
   Line(Cmd(SLASH .. " reset") .. " - put the counter back (Shift-drag it to move it)")
   Line("Settings: " .. SETTINGS_PATH .. " (" .. Cmd(SLASH .. " settings") .. ")")
 end
@@ -659,7 +664,7 @@ SlashCmdList.MEIOSHARDS = function(msg)
       Print("cap " .. OnOff(false))
     else
       Print(("keeping at most %d Soul Shards"):format(n)
-        .. (AboveCap() > 0 and (", " .. AboveCap() .. " above it: click the counter") or ""))
+        .. (AboveCap() > 0 and (", " .. AboveCap() .. " above it: press the key") or ""))
     end
   elseif word == "warn" then
     local n = Number(arg, ns.WARN_MAX)
@@ -669,7 +674,7 @@ SlashCmdList.MEIOSHARDS = function(msg)
     end
     Set("warn", n)
     Print(n == 0 and "low warning " .. OnOff(false)
-      or ("counter turns red below %d Soul Shard%s"):format(n, n == 1 and "" or "s"))
+      or ("low warning below %d Soul Shard%s"):format(n, n == 1 and "" or "s"))
   elseif (word == "chat" or word == "show" or word == "overflow" or word == "auto")
       and (arg == "on" or arg == "off") then
     Set(word, arg == "on")
@@ -724,6 +729,10 @@ events:SetScript("OnEvent", function(self, event, arg1)
     self:UnregisterEvent("ADDON_LOADED")
     MeioShardsDB = MeioShardsDB or {}
     db = MeioShardsDB
+    if (db.version or 1) < DB_VERSION and db.show then
+      db.show, db.chat = false, true
+    end
+    db.version = DB_VERSION
     for k, v in pairs(DEFAULTS) do
       if db[k] == nil then db[k] = v end
     end
