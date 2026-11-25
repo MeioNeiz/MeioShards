@@ -8,6 +8,8 @@
 ## Author: MeioNeiz
 ## X-Website: https://github.com/MeioNeiz/MeioShards
 ## X-License: MIT
+## X-Curse-Project-ID: 1829455
+## X-Wago-ID: QNl4VDNe
 ## SavedVariables: MeioShardsDB
 
 MeioShards.lua
