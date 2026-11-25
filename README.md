@@ -35,6 +35,16 @@ Esc > Options > Keybindings > AddOns > MeioShards.
 - `/shards reset`: put the counter back in its place
 - `/shards help`
 
+## Coming soon
+
+- Extras go by themselves: shards over your cap leave on your next key press or click,
+  never in combat and never the ones you brought from the bank; in dungeons, once you
+  leave
+- `/shards trim` for your Drain Soul macro
+
+![Coming soon: Soul Shards tooltip at 23 of 20: 1 goes by itself on your next key
+press](docs/soon.png)
+
 ## Install
 
 Use your addon manager (CurseForge, Wago), or unzip a GitHub release into
