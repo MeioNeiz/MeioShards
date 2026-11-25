@@ -2,14 +2,18 @@
 
 Your Soul Shard count always on screen, and one click or key to clear out the extras.
 
+For WoW Forever.
+
 ![Warlock bags: before, Soul Shards scattered among the loot to count by hand; with Meio
 Shards, a counter above the bags showing 15, its tooltip listing shards per bag, what they
-can make and "Click: delete 7 (no room in your soul bag)"](docs/before-after.png)
+can make and "Click: delete 7 (no room in your soul bag)"; one click later, the counter at 8
+and a chat line "deleted 7 Soul Shards, kept 8"](docs/before-after.png)
 
 ## What it does
 
 A small counter shows how many Soul Shards you carry. Hover it for the detail; click it (or
-press its key) to delete the shards you don't want.
+press its key) to delete the shards you don't want. Only deletes when you click or press its
+key, never on its own.
 
 - Deletes the loose shards your full Soul Pouch has no room for, and any above your cap
   (20 by default), then moves loose shards that fit into the pouch
@@ -42,7 +46,7 @@ Bugs and ideas: [GitHub issues](https://github.com/MeioNeiz/MeioShards/issues)
 
 ## More Meio addons
 
-[Meio TrainerCompare](https://www.curseforge.com/wow/addons/trainercompare) | [Meio Next Stop](https://www.curseforge.com/wow/addons/leavebutton) | [Meio AutoRank](https://www.curseforge.com/wow/addons/meio-autorank) | [Meio MeterHover](https://www.curseforge.com/wow/addons/meterhover) | [Meio Map](https://addons.wago.io/addons/meiomap) | [Meio Alts](https://addons.wago.io/addons/meioalts) | [Meio DPS](https://addons.wago.io/addons/meiodps) | [Meio Plates](https://addons.wago.io/addons/meioplates) | [Meio Hub](https://addons.wago.io/addons/meiohub) | [Meio Pets](https://addons.wago.io/addons/meiopets) | [Meio Stats](https://addons.wago.io/addons/meiostats) | [Meio Bags](https://addons.wago.io/addons/meiobags) | [Meio Fixes](https://addons.wago.io/addons/meiofixes) | [Meio Flight Times](https://addons.wago.io/addons/meioflighttimes)
+[Meio Trainer Compare](https://www.curseforge.com/wow/addons/trainercompare) | [Meio Next Stop](https://www.curseforge.com/wow/addons/leavebutton) | [Meio Auto Rank](https://www.curseforge.com/wow/addons/meio-autorank) | [Meio Meter Hover](https://www.curseforge.com/wow/addons/meterhover) | [Meio Map](https://addons.wago.io/addons/meiomap) | [Meio Alts](https://addons.wago.io/addons/meioalts) | [Meio DPS](https://addons.wago.io/addons/meiodps) | [Meio Plates](https://addons.wago.io/addons/meioplates) | [Meio Hub](https://addons.wago.io/addons/meiohub) | [Meio Pets](https://addons.wago.io/addons/meiopets) | [Meio Stats](https://addons.wago.io/addons/meiostats) | [Meio Bags](https://addons.wago.io/addons/meiobags) | [Meio Fixes](https://addons.wago.io/addons/meiofixes) | [Meio Flight Times](https://addons.wago.io/addons/meioflighttimes) | [Meio Tooltip Fold](https://addons.wago.io/addons/meiotooltipfold) | [Meio Auto Run Turn](https://addons.wago.io/addons/meioautorunturn) | [Meio Mail](https://addons.wago.io/addons/meiomail) | [Meio QoL](https://addons.wago.io/addons/meioqol) | [Meio TSM Browse](https://addons.wago.io/addons/tsmbrowse)
 
 ## Licence
 
