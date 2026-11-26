@@ -1,6 +1,7 @@
 # Meio Shards
 
-One key deletes the Soul Shards you don't need, and a chat line tells you when you run out.
+Soul Shards filling your bags? One key deletes the ones over your cap, and a chat line
+tells you when you run out.
 
 For WoW Forever.
 
