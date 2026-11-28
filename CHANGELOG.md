@@ -1,5 +1,9 @@
 # Meio Shards
 
+## 1.4.1
+
+- Settings labels no longer cut short: "Loose shards", "Chat when low"
+
 ## 1.4.0
 
 - The Soul Shard counter is no longer on screen: the key, `/shards trim` and data broker

@@ -48,7 +48,7 @@ function ns.RegisterSettings()
     .. "the world. Never in combat; in a dungeon they go after you leave. Never the shards you "
     .. "had at login or took from your bank, mail or a trade: press the key for those. "
     .. "/shards auto on||off does the same.")
-  Checkbox(category, "overflow", "Delete loose shards", "With a soul bag "
+  Checkbox(category, "overflow", "Loose shards", "With a soul bag "
     .. "equipped, the key deletes loose shards in your other bags once the soul bag is full, "
     .. "and moves them into it while it has room. Without a soul bag nothing is loose. "
     .. "/shards overflow on||off does the same.")
@@ -58,7 +58,7 @@ function ns.RegisterSettings()
   Slider(category, "warn", "Warn below", ns.WARN_MAX, "Fewer Soul Shards than this is low, "
     .. "once you know a spell that uses one: the count turns red. Off: never low. /shards warn "
     .. "does the same.")
-  Checkbox(category, "chat", "Chat line when low", "One line in chat when you run low. Never "
+  Checkbox(category, "chat", "Chat when low", "One line in chat when you run low. Never "
     .. "at login. /shards chat on||off does the same.")
 
   Header(layout, "Counter", "Your count also shows on Titan Panel, ChocolateBar and other data "
